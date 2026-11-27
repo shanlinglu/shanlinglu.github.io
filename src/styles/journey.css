@@ -36,15 +36,20 @@
 }
 
 .journey-action:hover { background: #385749; border-color: #f7f2e4a0; }
+.journey-action svg[hidden] { display: none; }
 
-.journey-back, .journey-upload, .journey-controls {
+.journey-back, .journey-utilities, .journey-controls {
   position: absolute;
   z-index: 2;
 }
 
-.journey-back, .journey-upload { top: max(16px, calc(env(safe-area-inset-top) + 10px)); }
+.journey-back, .journey-utilities { top: max(16px, calc(env(safe-area-inset-top) + 10px)); }
 .journey-back { left: max(16px, calc(env(safe-area-inset-left) + 10px)); }
-.journey-upload { right: max(16px, calc(env(safe-area-inset-right) + 10px)); }
+.journey-utilities {
+  right: max(16px, calc(env(safe-area-inset-right) + 10px));
+  display: flex;
+  gap: 8px;
+}
 
 .journey-controls {
   right: max(16px, calc(env(safe-area-inset-right) + 10px));
@@ -165,6 +170,7 @@
 
 .journey-photo[data-position='hidden'] { visibility: hidden; pointer-events: none; }
 .journey-stage[data-dragging] .journey-photo { transition: none; }
+.journey-stage:not([data-ready]) .journey-photo { visibility: hidden; }
 
 .journey-print {
   position: relative;

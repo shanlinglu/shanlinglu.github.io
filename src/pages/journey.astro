@@ -1,5 +1,5 @@
 ---
-import { ArrowLeft, ArrowRight, ImageOff, Upload } from '@lucide/astro';
+import { ArrowLeft, ArrowRight, ImageOff, Pause, Play, Upload } from '@lucide/astro';
 import Shell from '../layouts/Shell.astro';
 import { getJourneyPhotos, journeyUploadUrl } from '../lib/journey-photos';
 import '../styles/journey.css';
@@ -26,9 +26,16 @@ const total = String(photos.length).padStart(2, '0');
       <a class="journey-action journey-back" href="/#works" aria-label="返回作品集" title="返回作品集">
         <ArrowLeft size={20} aria-hidden="true" />
       </a>
-      <a class="journey-action journey-upload" href={journeyUploadUrl} target="_blank" rel="noopener" aria-label="在 GitHub 添加照片（新窗口）" title="添加照片">
-        <Upload size={19} aria-hidden="true" />
-      </a>
+      <div class="journey-utilities">
+        {photos.length > 1 && <button class="journey-action" type="button" aria-label="自动播放" aria-pressed="true" title="暂停自动播放" data-album-playback>
+          <Pause size={19} aria-hidden="true" data-playback-pause />
+          <Play size={19} aria-hidden="true" data-playback-play hidden />
+        </button>}
+        <a class="journey-action journey-upload" href={journeyUploadUrl} target="_blank" rel="noopener" aria-label="在 GitHub 添加照片（新窗口）" title="添加照片">
+          <Upload size={19} aria-hidden="true" />
+        </a>
+      </div>
+      <noscript><style>.journey-stage:not([data-ready]) .journey-photo:not([data-position='hidden']) { visibility: visible }</style></noscript>
       <div class="journey-stage" data-album-stage>
         {photos.map((photo, index) => {
           const position = positions.find(([offset]) => (offset + photos.length) % photos.length === index)?.[1] ?? 'hidden';
@@ -44,7 +51,7 @@ const total = String(photos.length).padStart(2, '0');
           );
         })}
       </div>
-      <div class="journey-sr-only" aria-live="polite" aria-atomic="true">
+      <div class="journey-sr-only" aria-live={photos.length > 1 ? 'off' : 'polite'} aria-atomic="true" data-album-announcement>
         <span data-album-current>01</span> / {total}
         <span data-album-title>{photos[0].title}</span>
       </div>

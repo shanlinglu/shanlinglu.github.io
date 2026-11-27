@@ -29,13 +29,44 @@ export function initJourneyAlbum(root: HTMLElement) {
   }));
   const current = root.querySelector<HTMLElement>('[data-album-current]');
   const title = root.querySelector<HTMLElement>('[data-album-title]');
+  const announcement = root.querySelector<HTMLElement>('[data-album-announcement]');
   const previous = root.querySelector<HTMLButtonElement>('[data-album-prev]');
   const next = root.querySelector<HTMLButtonElement>('[data-album-next]');
+  const playback = root.querySelector<HTMLButtonElement>('[data-album-playback]');
+  const pauseIcon = playback?.querySelector<SVGElement>('[data-playback-pause]');
+  const playIcon = playback?.querySelector<SVGElement>('[data-playback-play]');
   const total = slides.length;
   const pad = Math.max(2, String(total).length);
   let activeIndex = 0;
   let gesture: Gesture | undefined;
   let suppressClick = false;
+  let playing = total > 1;
+  let playbackTimer: number | undefined;
+  let revealRequest = 0;
+
+  function shuffleSlides() {
+    for (let index = slides.length - 1; index > 0; index--) {
+      const other = Math.floor(Math.random() * (index + 1));
+      [slides[index], slides[other]] = [slides[other], slides[index]];
+    }
+  }
+
+  function schedulePlayback() {
+    if (playbackTimer !== undefined) window.clearTimeout(playbackTimer);
+    playbackTimer = undefined;
+    if (!playing || document.hidden || gesture) return;
+    playbackTimer = window.setTimeout(() => show(activeIndex + 1), 5_000);
+  }
+
+  function setPlaying(nextState: boolean) {
+    playing = nextState && total > 1;
+    playback?.setAttribute('aria-pressed', String(playing));
+    playback?.setAttribute('title', playing ? '暂停自动播放' : '开启自动播放');
+    announcement?.setAttribute('aria-live', playing ? 'off' : 'polite');
+    pauseIcon?.toggleAttribute('hidden', !playing);
+    playIcon?.toggleAttribute('hidden', playing);
+    schedulePlayback();
+  }
 
   function wrap(index: number) {
     return (index + total) % total;
@@ -69,10 +100,21 @@ export function initJourneyAlbum(root: HTMLElement) {
 
     if (current) current.textContent = String(activeIndex + 1).padStart(pad, '0');
     if (title) title.textContent = slides[activeIndex].figure.dataset.title ?? '';
+    if (!stage?.hasAttribute('data-ready')) {
+      const activeReveal = ++revealRequest;
+      const images = slides
+        .filter((_, slideIndex) => positions.has(slideIndex))
+        .map(slide => slide.image?.decode().catch(() => undefined));
+      void Promise.all(images).then(() => {
+        if (activeReveal === revealRequest) stage?.setAttribute('data-ready', '');
+      });
+    }
+    schedulePlayback();
   }
 
-  slides.forEach(({ figure, select, image }, index) => {
-    select?.addEventListener('click', () => show(index));
+  slides.forEach(slide => {
+    const { figure, select, image } = slide;
+    select?.addEventListener('click', () => show(slides.indexOf(slide)));
     const fallback = figure.querySelector<HTMLElement>('[data-album-fallback]');
     if (!image) return;
 
@@ -89,6 +131,13 @@ export function initJourneyAlbum(root: HTMLElement) {
   if (next) next.disabled = total < 2;
   previous?.addEventListener('click', () => show(activeIndex - 1));
   next?.addEventListener('click', () => show(activeIndex + 1));
+  playback?.addEventListener('click', () => setPlaying(!playing));
+  document.addEventListener('visibilitychange', schedulePlayback);
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    shuffleSlides();
+    show(0);
+  });
 
   root.addEventListener('keydown', event => {
     if (total < 2 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
@@ -105,6 +154,7 @@ export function initJourneyAlbum(root: HTMLElement) {
     stage?.removeAttribute('data-dragging');
     stage?.style.removeProperty('--drag-x');
     if (completed.source.hasPointerCapture(pointerId)) completed.source.releasePointerCapture(pointerId);
+    schedulePlayback();
     return completed;
   }
 
@@ -124,6 +174,7 @@ export function initJourneyAlbum(root: HTMLElement) {
     };
     // Capture on the pressed control so a simple press still produces a native click.
     source.setPointerCapture(event.pointerId);
+    schedulePlayback();
   });
 
   stage.addEventListener('pointermove', event => {
@@ -168,5 +219,6 @@ export function initJourneyAlbum(root: HTMLElement) {
     suppressClick = false;
   }, { capture: true });
 
-  show(activeIndex);
+  shuffleSlides();
+  show(0);
 }
