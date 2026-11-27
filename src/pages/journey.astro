@@ -1,0 +1,62 @@
+---
+import { ArrowLeft, ArrowRight, ImageOff, Upload } from '@lucide/astro';
+import Shell from '../layouts/Shell.astro';
+import { getJourneyPhotos, journeyUploadUrl } from '../lib/journey-photos';
+import '../styles/journey.css';
+
+const shared = await getJourneyPhotos();
+const demo = [
+  ['graduation', '抛起学士帽'],
+  ['campus', '走过无数次的路'],
+  ['sunflowers', '仍在盛开的夏天'],
+  ['coast', '吹到海边的风'],
+  ['mountains', '再远一点的地方'],
+  ['morning', '雾散以前'],
+  ['friends', '围坐的寻常午后'],
+];
+const photos = shared.length ? shared : demo.map(([id, title]) => ({ id, title, src: `/images/journey/${id}.jpg` }));
+const positions = [
+  [0, 'current'], [-1, 'previous'], [1, 'next'],
+  [-2, 'previous-far'], [2, 'next-far'], [-3, 'below'], [3, 'above'],
+] as const;
+const total = String(photos.length).padStart(2, '0');
+---
+<Shell title="拾光旅路" description="山泠庐的共享纪念相册。" immersive>
+  <section class="journey" data-album aria-label="拾光旅路">
+      <a class="journey-action journey-back" href="/#works" aria-label="返回作品集" title="返回作品集">
+        <ArrowLeft size={20} aria-hidden="true" />
+      </a>
+      <a class="journey-action journey-upload" href={journeyUploadUrl} target="_blank" rel="noopener" aria-label="在 GitHub 添加照片（新窗口）" title="添加照片">
+        <Upload size={19} aria-hidden="true" />
+      </a>
+      <div class="journey-stage" data-album-stage>
+        {photos.map((photo, index) => {
+          const position = positions.find(([offset]) => (offset + photos.length) % photos.length === index)?.[1] ?? 'hidden';
+          return (
+            <figure class="journey-photo" data-album-photo data-position={position} data-title={photo.title} inert={position === 'hidden'}>
+              <button class="journey-print" type="button" aria-label={'查看照片 ' + photo.title} data-album-select>
+                <img src={photo.src} alt="" loading={position === 'hidden' ? 'lazy' : 'eager'} fetchpriority={position === 'current' ? 'high' : undefined} decoding={position === 'hidden' ? 'async' : 'auto'} draggable="false" />
+                <span class="journey-photo-fallback" data-album-fallback hidden>
+                  <ImageOff size={26} aria-hidden="true" /><span class="journey-sr-only">照片无法加载</span>
+                </span>
+              </button>
+            </figure>
+          );
+        })}
+      </div>
+      <div class="journey-sr-only" aria-live="polite" aria-atomic="true">
+        <span data-album-current>01</span> / {total}
+        <span data-album-title>{photos[0].title}</span>
+      </div>
+      {photos.length > 1 && <div class="journey-controls">
+        <button class="journey-action" type="button" aria-label="上一张照片" data-album-prev><ArrowLeft size={20} aria-hidden="true" /></button>
+        <button class="journey-action" type="button" aria-label="下一张照片" data-album-next><ArrowRight size={20} aria-hidden="true" /></button>
+      </div>}
+  </section>
+</Shell>
+
+<script>
+  import { initJourneyAlbum } from '../lib/journey-album';
+  const album = document.querySelector<HTMLElement>('[data-album]');
+  if (album) initJourneyAlbum(album);
+</script>

@@ -2,12 +2,13 @@
 import { ArrowUpRight, BookOpen, Menu, X } from '@lucide/astro';
 import '../styles/site.css';
 
-interface Props { title?: string; description?: string; assetBase?: string }
-const { title = '山泠庐', description = '一个宿舍的创意作品集。一起做小游戏、写实用工具，也记录值得分享的探索。', assetBase } = Astro.props;
+interface Props { title?: string; description?: string; assetBase?: string; immersive?: boolean }
+const { title = '山泠庐', description = '一个宿舍的创意作品集。一起做小游戏、写实用工具，也记录值得分享的探索。', assetBase, immersive = false } = Astro.props;
 const path = Astro.url.pathname;
 const repository = 'https://github.com/shanlinglu/shanlinglu.github.io';
 const nav = [
   { label: '作品集', href: '/#works', active: path === '/' || path.startsWith('/works/') },
+  { label: '拾光旅路', href: '/journey/', active: path === '/journey' || path.startsWith('/journey/') },
   { label: '关于我们', href: '/about/', active: path.startsWith('/about/') },
 ];
 ---
@@ -16,17 +17,17 @@ const nav = [
   <head>
     <meta charset="utf-8" />
     {assetBase && <base href={assetBase} />}
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f7f6ef" />
+    <meta name="viewport" content={immersive ? 'width=device-width, initial-scale=1, viewport-fit=cover' : 'width=device-width, initial-scale=1'} />
+    <meta name="theme-color" content={immersive ? '#1b302a' : '#f7f6ef'} />
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/mark.svg" />
     <title>{title === '山泠庐' ? '山泠庐 · 创意作品集' : title + ' · 山泠庐'}</title>
   </head>
-  <body>
+  <body class:list={{ 'immersive-page': immersive }}>
     <a class="skip" href={path + '#main'}>跳到正文</a>
-    <header class="topbar">
+    {!immersive && <header class="topbar">
       <div class="wrap bar-inner">
         <a href="/" class="identity" aria-label="山泠庐首页"><img src="/mark.svg" width="39" height="39" alt="" /><strong>山泠庐</strong><span>Shanlinglu</span></a>
         <button class="menu-button" id="mobile-menu" aria-label="打开导航" aria-expanded="false" aria-controls="site-nav"><Menu size={21} class="menu-open" /><X size={21} class="menu-close" /></button>
@@ -36,12 +37,12 @@ const nav = [
           <a class="guide-button" href="/contribute/" aria-current={path.startsWith('/contribute/') ? 'page' : undefined}><BookOpen size={16} stroke-width={1.7} />投稿指南</a>
         </nav>
       </div>
-    </header>
-    <main id="main"><slot /></main>
-    <footer class="site-footer"><div class="wrap footer-inner">
+    </header>}
+    <main id="main" tabindex={immersive ? '-1' : undefined}><slot /></main>
+    {!immersive && <footer class="site-footer"><div class="wrap footer-inner">
       <a href="/" class="footer-brand"><img src="/mark.svg" width="23" height="23" alt="" />山泠庐 <span>SHANLINGLU</span></a>
       <div><a href="/contribute/">投稿指南</a><a href={repository}>GitHub <ArrowUpRight size={12} /></a></div>
-    </div></footer>
+    </div></footer>}
     <script>
       const toggle = document.querySelector<HTMLButtonElement>('#mobile-menu');
       const nav = document.querySelector<HTMLElement>('#site-nav');

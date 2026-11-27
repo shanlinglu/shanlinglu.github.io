@@ -1,0 +1,232 @@
+.immersive-page {
+  min-height: 100dvh;
+  background: #1b302a;
+}
+
+.journey {
+  position: relative;
+  isolation: isolate;
+  block-size: 100vh;
+  block-size: 100dvh;
+  overflow: hidden;
+  background: #1b302a;
+}
+
+.journey-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.journey-action {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #f7f2e460;
+  border-radius: 50%;
+  background: #192d28c9;
+  color: #f7f2e4;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+
+.journey-action:hover { background: #385749; border-color: #f7f2e4a0; }
+
+.journey-back, .journey-upload, .journey-controls {
+  position: absolute;
+  z-index: 2;
+}
+
+.journey-back, .journey-upload { top: max(16px, calc(env(safe-area-inset-top) + 10px)); }
+.journey-back { left: max(16px, calc(env(safe-area-inset-left) + 10px)); }
+.journey-upload { right: max(16px, calc(env(safe-area-inset-right) + 10px)); }
+
+.journey-controls {
+  right: max(16px, calc(env(safe-area-inset-right) + 10px));
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 10px));
+  display: flex;
+  gap: 8px;
+}
+
+.journey-stage {
+  --drag-x: 0px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 100%;
+  touch-action: pan-y pinch-zoom;
+  background:
+    radial-gradient(ellipse at 50% 44%, #677e70 0, #334f44 46%, #1b302a 100%);
+}
+
+.journey-stage::after {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 48%, #10211d85 100%);
+  content: '';
+}
+
+.journey-photo {
+  --x: 90vw;
+  --y: 0px;
+  --tilt: 0deg;
+  --scale: .35;
+  --drag-rate: .32;
+  --softness: 4px;
+  --fade: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: min(56%, 1040px);
+  height: 68%;
+  margin: 0;
+  filter: blur(var(--softness));
+  opacity: var(--fade);
+  transform: translate(-50%, -50%) translate(calc(var(--x) + var(--drag-x) * var(--drag-rate)), var(--y))
+    rotate(var(--tilt)) scale(var(--scale));
+  transition: transform .56s cubic-bezier(.22, .65, .26, 1), opacity .44s ease, filter .46s ease;
+}
+
+/* Uneven positions and different drag speeds give foreground and background distinct depth. */
+.journey-photo[data-position='current'] {
+  --x: 0px;
+  --scale: 1;
+  --drag-rate: 1;
+  --softness: 0px;
+  --fade: 1;
+  z-index: 21;
+}
+
+.journey-photo[data-position='previous'] {
+  --x: -34vw;
+  --y: -13%;
+  --tilt: -11deg;
+  --scale: .66;
+  --drag-rate: .65;
+  --softness: 2px;
+  --fade: .79;
+  z-index: 8;
+}
+
+.journey-photo[data-position='next'] {
+  --x: 34vw;
+  --y: 15vh;
+  --tilt: 9deg;
+  --scale: .68;
+  --drag-rate: .65;
+  --softness: 2px;
+  --fade: .83;
+  z-index: 8;
+}
+
+.journey-photo[data-position='previous-far'] {
+  --x: -28vw;
+  --y: 26vh;
+  --tilt: 11deg;
+  --scale: .47;
+  --fade: .62;
+  z-index: 5;
+}
+
+.journey-photo[data-position='next-far'] {
+  --x: 29vw;
+  --y: -24vh;
+  --tilt: -8deg;
+  --scale: .49;
+  --fade: .64;
+  z-index: 5;
+}
+
+.journey-photo[data-position='below'] {
+  --x: -15vw;
+  --y: 37vh;
+  --tilt: -13deg;
+  --scale: .43;
+  --fade: .46;
+  z-index: 3;
+}
+
+.journey-photo[data-position='above'] {
+  --x: 11vw;
+  --y: -34vh;
+  --tilt: 14deg;
+  --scale: .42;
+  --fade: .42;
+  z-index: 3;
+}
+
+.journey-photo[data-position='hidden'] { visibility: hidden; pointer-events: none; }
+.journey-stage[data-dragging] .journey-photo { transition: none; }
+
+.journey-print {
+  position: relative;
+  justify-self: center;
+  align-self: center;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  padding: clamp(6px, .9vw, 12px);
+  border: 0;
+  border-radius: 2px;
+  background: #f7f2e4;
+  box-shadow: 0 22px 45px #08171173, 0 2px 8px #0f1e1880;
+  color: var(--green);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.journey-print img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  grid-area: 1 / 1;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.journey-photo[data-position='current'] img {
+  object-fit: contain;
+  background: #ebe7dc;
+}
+
+.journey-photo[data-position='current'] .journey-print { cursor: grab; }
+.journey-stage[data-dragging] .journey-print { cursor: grabbing; }
+
+.journey-photo-fallback {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  background: #e4e9df;
+  font-size: 13px;
+}
+
+.journey-photo [hidden], .journey-photo[data-unavailable] img { display: none; }
+
+@media (max-aspect-ratio: 4 / 5) {
+  .journey-photo { width: 83%; height: min(52%, 98vw); }
+  .journey-photo[data-position='previous'] { --x: -36vw; --y: -18vh; --scale: .72; }
+  .journey-photo[data-position='next'] { --x: 36vw; --y: 18vh; --scale: .75; }
+  .journey-photo[data-position='previous-far'] { --x: -32vw; --y: 28vh; --scale: .58; }
+  .journey-photo[data-position='next-far'] { --x: 31vw; --y: -28vh; --scale: .62; }
+  .journey-photo[data-position='below'] { --y: 36vh; --scale: .55; }
+  .journey-photo[data-position='above'] { --y: -37vh; --scale: .55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-photo, .journey-action { transition: none; }
+}
