@@ -7,8 +7,10 @@ import { lookup } from 'mrmime';
 const prefix = '/assets/works/';
 
 function isPublished(parts) {
+  const isWorkSource = parts.length === 2 && parts[1] === 'index.md';
+  const isCollectionSource = parts.length === 4 && parts[1] === 'articles' && parts[3] === 'index.md';
   return parts.length >= 1 && parts.every(part => part && !part.startsWith('.') && !part.includes('\\')) &&
-    !(parts.length === 2 && parts[1] === 'index.md');
+    !isWorkSource && !isCollectionSource;
 }
 
 export default function workAssets() {

@@ -28,6 +28,27 @@ action: 开始玩
 
 用 `type` 填写分类，新类型会自动出现在首页筛选器里。`author` 写希望公开显示的名字。`cover` 填作品目录里的图片相对路径，省略时卡片会显示分类图标。`action` 可以写“开始玩”“读手记”或“打开工具”。
 
+### 给现有栏目追加文章
+
+在栏目目录下新建 `articles/<文章目录名>/index.md`，目录名用小写英文字母、数字和短横线。比如在 `works/hangai-games/articles/` 下新建 `new-review/index.md`，发布后地址就是 `/works/hangai-games/new-review/`。构建时会生成文章页，并按发表日期从新到旧更新栏目目录。
+
+```markdown
+---
+title: 文章标题
+author: 公开署名
+summary: 一句话介绍这篇文章。
+date: '2026-11-27'
+cover: cover.webp
+source: https://example.com/original
+---
+
+正文写在这里。配图与正文放在同一个文章目录，用相对路径引用。
+
+![配图说明](images/screenshot.webp)
+```
+
+`cover` 和 `source` 可省略。需要标注剧透时，可在顶部填写 `spoiler`，例如 `spoiler: 轻度剧透`。
+
 ## 3. 开一个 Pull Request
 
 在网页编辑器左下角点击分支名，从 `main` 创建新分支，例如 `add-dorm-clock`。在左侧“源代码管理”里填写“添加宿舍时钟”，提交并推送该分支。返回 GitHub 仓库，点 **Compare & pull request**，确认目标分支为 `main`，写明作品怎么玩或怎么看，再点 **Create pull request**。

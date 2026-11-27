@@ -1,8 +1,8 @@
 ---
 import Shell from '../layouts/Shell.astro';
 import { getWorks } from '../lib/works';
-import { ArrowDown, ArrowUpRight, Feather, Gamepad2, Grid2X2, Hammer, Layers3, NotebookPen, UserRound } from '@lucide/astro';
-const icons = new Map([['游戏', Gamepad2], ['工具', Hammer], ['手记', NotebookPen], ['学术', NotebookPen]]);
+import { ArrowDown, ArrowUpRight, BookOpen, Feather, Gamepad2, Grid2X2, Hammer, Layers3, NotebookPen, UserRound } from '@lucide/astro';
+const icons = new Map([['游戏', Gamepad2], ['工具', Hammer], ['手记', NotebookPen], ['学术', NotebookPen], ['栏目', BookOpen]]);
 const priority = (type: string) => [...icons.keys()].indexOf(type) < 0 ? 99 : [...icons.keys()].indexOf(type);
 const works = (await getWorks()).sort((a,b) => priority(a.type) - priority(b.type) || a.title.localeCompare(b.title, 'zh-CN'));
 const types = [...new Set(works.map(work => work.type))];
