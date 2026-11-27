@@ -13,7 +13,6 @@ const imageExtension = /\.(?:avif|gif|jpe?g|png|webp)$/i;
 const filenameOrder = new Intl.Collator('zh-CN', { numeric: true });
 
 export const journeyUploadUrl = `${repositoryUrl}/upload/main/${folderPath}`;
-export const journeyFolderUrl = `${repositoryUrl}/tree/main/${folderPath}`;
 
 export async function getJourneyPhotos(): Promise<JourneyPhoto[]> {
   const entries = await readdir(join(process.cwd(), folderPath), { withFileTypes: true });

@@ -6,3 +6,5 @@
 4. 提交到 `main`。GitHub Pages 部署成功后，所有访客刷新「拾光旅路」即可看到更新。[查看部署记录](https://github.com/shanlinglu/shanlinglu.github.io/actions)
 
 仓库和相册均可公开访问，请上传适合公开分享的照片。要从相册移除照片，请在仓库删除对应的文件并提交到 `main`。下次部署后，相册将移除该照片，Git 记录仍可能保留原文件。
+
+共享目录为空时，相册会使用来自 Pexels 的示例照片。[毕业](https://www.pexels.com/photo/267885/) · [校园](https://www.pexels.com/photo/207692/) · [向日葵](https://www.pexels.com/photo/129137/) · [海边](https://www.pexels.com/photo/1005417/) · [群山](https://www.pexels.com/photo/414171/) · [晨雾](https://www.pexels.com/photo/325185/) · [好友](https://www.pexels.com/photo/933964/)
