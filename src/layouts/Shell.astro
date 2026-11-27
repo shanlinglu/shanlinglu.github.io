@@ -8,6 +8,7 @@ const path = Astro.url.pathname;
 const repository = 'https://github.com/shanlinglu/shanlinglu.github.io';
 const nav = [
   { label: '作品集', href: '/#works', active: path === '/' || path.startsWith('/works/') },
+  { label: '拾光旅路', href: '/journey/', active: path === '/journey' || path.startsWith('/journey/') },
   { label: '关于我们', href: '/about/', active: path.startsWith('/about/') },
 ];
 ---

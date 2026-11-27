@@ -1,0 +1,78 @@
+---
+import { ArrowLeft, ArrowRight, ArrowUpRight, ImageOff, Upload } from '@lucide/astro';
+import Shell from '../layouts/Shell.astro';
+import { getJourneyPhotos, journeyFolderUrl, journeyUploadUrl } from '../lib/journey-photos';
+import '../styles/journey.css';
+
+const shared = await getJourneyPhotos();
+const demo = [
+  ['graduation', '抛起学士帽', '267885'],
+  ['campus', '走过无数次的路', '207692'],
+  ['sunflowers', '仍在盛开的夏天', '129137'],
+  ['coast', '吹到海边的风', '1005417'],
+  ['mountains', '再远一点的地方', '414171'],
+  ['morning', '雾散以前', '325185'],
+  ['friends', '围坐的寻常午后', '933964'],
+];
+const photos = shared.length ? shared : demo.map(([id, title]) => ({ id, title, src: `/images/journey/${id}.jpg` }));
+const positions = [
+  [0, 'current'], [-1, 'previous'], [1, 'next'],
+  [-2, 'previous-far'], [2, 'next-far'], [-3, 'below'], [3, 'above'],
+] as const;
+const total = String(photos.length).padStart(2, '0');
+---
+<Shell title="拾光旅路" description="山泠庐的共享纪念相册。">
+  <div class="journey wrap" data-album>
+    <header class="journey-heading">
+      <h1>拾光旅路</h1>
+      <a class="journey-upload" href={journeyUploadUrl} target="_blank" rel="noopener">
+        <Upload size={15} aria-hidden="true" />添加照片<ArrowUpRight size={13} aria-hidden="true" />
+      </a>
+    </header>
+
+    <section class="journey-album" aria-label="纪念相册" aria-roledescription="相册">
+      <div class="journey-stage" data-album-stage>
+        {photos.map((photo, index) => {
+          const position = positions.find(([offset]) => (offset + photos.length) % photos.length === index)?.[1] ?? 'hidden';
+          return (
+            <figure class="journey-photo" data-album-photo data-position={position} data-title={photo.title} inert={position === 'hidden'}>
+              <button class="journey-print" type="button" aria-label={'查看照片 ' + photo.title} data-album-select>
+                <img src={photo.src} alt="" loading={position === 'current' ? 'eager' : 'lazy'} decoding="async" draggable="false" />
+                <span class="journey-photo-fallback" data-album-fallback hidden>
+                  <ImageOff size={26} aria-hidden="true" />照片无法加载
+                </span>
+              </button>
+            </figure>
+          );
+        })}
+      </div>
+      <div class="journey-caption">
+        <div class="journey-caption-copy" aria-live="polite" aria-atomic="true">
+          <span class="journey-pagination"><span data-album-current>01</span><span class="journey-pagination-divider">/</span>{total}</span>
+          <p data-album-title>{photos[0].title}</p>
+        </div>
+        <div class="journey-controls">
+          <button type="button" aria-label="上一张照片" data-album-prev disabled={photos.length < 2}><ArrowLeft size={19} aria-hidden="true" /></button>
+          <button type="button" aria-label="下一张照片" data-album-next disabled={photos.length < 2}><ArrowRight size={19} aria-hidden="true" /></button>
+        </div>
+      </div>
+    </section>
+
+    <div class="journey-notes">
+      <p>{!shared.length && '当前为示例相册。'}{photos.length > 1 && '左右滑动浏览。'}</p>
+      <a href={journeyFolderUrl} target="_blank" rel="noopener">在 GitHub 管理照片 <ArrowUpRight size={13} aria-hidden="true" /></a>
+    </div>
+    {!shared.length && (
+      <details class="journey-credits">
+        <summary>示例照片来源</summary>
+        <ul>{demo.map(([, title, id]) => <li><a href={`https://www.pexels.com/photo/${id}/`}>{title}</a></li>)}</ul>
+      </details>
+    )}
+  </div>
+</Shell>
+
+<script>
+  import { initJourneyAlbum } from '../lib/journey-album';
+  const album = document.querySelector<HTMLElement>('[data-album]');
+  if (album) initJourneyAlbum(album);
+</script>
