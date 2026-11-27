@@ -1,0 +1,27 @@
+---
+import { ArrowLeft, ArrowUpRight } from '@lucide/astro';
+import Shell from '../../layouts/Shell.astro';
+import { getWorks } from '../../lib/works';
+
+export function getStaticPaths() {
+  return getWorks().map(work => ({ params: { slug: work.slug }, props: { work } }));
+}
+const { work } = Astro.props;
+const { Content } = work;
+---
+{work.article ? <Shell title={work.title} description={work.summary} assetBase={'/assets/works/' + work.slug + '/'}>
+  <article class="paper-page">
+    <a href="/#works" class="back"><ArrowLeft size={14} />返回作品集</a>
+    <header><h1>{work.title}</h1><p class="byline">{work.type} · {work.author}</p></header>
+    <div class="prose"><Content /></div>
+    {work.source && <a class="back" href={work.source}>查看作品源码 <ArrowUpRight size={14} /></a>}
+  </article>
+</Shell> : <html lang="zh-CN"><head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="refresh" content={'0;url=' + work.target} />
+  <title>{work.title} · 山泠庐</title>
+</head><body><a href={work.target}>{work.action} · {work.title}</a></body></html>}
+<style>
+  .byline { color: #667061; font-size: 14px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 22px; }
+</style>

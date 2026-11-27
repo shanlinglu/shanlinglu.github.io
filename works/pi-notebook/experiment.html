@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f2e8">
+  <title>随机投点实验 · 山泠庐</title>
+  <style>
+    :root { color-scheme: light; --paper: #f6f3e8; --ink: #24394a; --blue: #21517a; --rust: #a54e34; --rule: #c5cecc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.65 "Atkinson Hyperlegible Next", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    main { max-width: 950px; margin: auto; padding: 30px clamp(20px, 5vw, 65px) 55px; }
+    a { color: var(--blue); text-underline-offset: .25em; }
+    header { margin: clamp(25px, 6vh, 55px) 0 25px; }
+    h1 { margin: 0; font: bold 3.3rem/1.3 "STIX Two Text", "Songti SC", serif; }
+    header p { margin: 8px 0 0; }
+    .experiment { border-top: 1px solid var(--rule); padding-top: 22px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .86fr); gap: clamp(22px, 5vw, 60px); align-items: center; }
+    figure { margin: 0; }
+    canvas { width: 100%; display: block; aspect-ratio: 1; background: #fffdf3; border: 1px solid #8c9a9c; }
+    figcaption { display: flex; justify-content: center; gap: 1.3rem; margin-top: .6rem; color: #435260; font-size: .88rem; }
+    .inside { color: var(--blue); }
+    .outside { color: var(--rust); }
+    dl { margin: 0 0 1.6rem; }
+    dl > div { display: flex; align-items: baseline; justify-content: space-between; padding: .4rem 0; border-bottom: 1px solid var(--rule); }
+    dd { font-variant-numeric: tabular-nums; margin: 0; }
+    dl > div:first-child { display: block; }
+    #estimate { color: var(--blue); font: 400 4rem/1.25 "STIX Two Text", Georgia, serif; font-variant-numeric: tabular-nums; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button { cursor: pointer; font: inherit; padding: .55rem .3rem; min-height: 44px; border: 1px solid var(--blue); border-radius: 4px; color: var(--blue); background: transparent; }
+    button:first-child { color: #fff; background: var(--blue); }
+    button:hover { box-shadow: inset 0 0 0 2px var(--blue); }
+    button:active { transform: translateY(1px); }
+    button:focus-visible, a:focus-visible { outline: 3px solid #93642e; outline-offset: 3px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @media (max-width: 620px) {
+      main { padding-top: 18px; }
+      h1 { font-size: 2.3rem; }
+      #estimate { font-size: 2.8rem; }
+      .experiment { grid-template-columns: 1fr; gap: 16px; }
+      figure { width: min(100%, 360px); margin: auto; }
+      dl { margin-bottom: .9rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="/works/pi-notebook/">← 回到《把圆周率投出来》</a>
+    <header>
+      <h1>随机投点实验</h1>
+      <p>向正方形里撒点，用圆内点数占比乘以 4，估一估圆周率。</p>
+    </header>
+    <div class="experiment">
+      <figure>
+        <canvas id="plot" width="800" height="800" role="img" aria-label="随机投点分布图，实验的圆内点数与总点数在下方列出。"></canvas>
+        <figcaption><span><b class="inside">●</b> 圆内</span><span><b class="outside">×</b> 圆外</span></figcaption>
+      </figure>
+      <section aria-label="实验读数与操作">
+        <dl>
+          <div><dt>π 的估计值</dt><dd id="estimate">—</dd></div>
+          <div><dt>圆内点数</dt><dd id="inside">0</dd></div>
+          <div><dt>投点总数</dt><dd id="total">0</dd></div>
+        </dl>
+        <div class="actions">
+          <button type="button" data-count="100">投 100 点</button>
+          <button type="button" data-count="1000">投 1,000 点</button>
+          <button type="button" data-count="10000">投 10,000 点</button>
+          <button type="button" id="reset">清空</button>
+        </div>
+        <p id="announcement" class="sr-only" role="status"></p>
+        <noscript><p>启用 JavaScript 即可进行实验。</p></noscript>
+      </section>
+    </div>
+  </main>
+  <script>
+    const canvas = document.getElementById('plot');
+    const pen = canvas.getContext('2d');
+    const size = canvas.width;
+    const tally = { inside: 0, total: 0 };
+
+    function showResult() {
+      const estimate = tally.total ? (4 * tally.inside / tally.total).toFixed(5) : '—';
+      document.getElementById('estimate').textContent = estimate;
+      document.getElementById('inside').textContent = tally.inside.toLocaleString('zh-CN');
+      document.getElementById('total').textContent = tally.total.toLocaleString('zh-CN');
+      document.getElementById('announcement').textContent = tally.total
+        ? '共投 ' + tally.total + ' 点，圆内 ' + tally.inside + ' 点，圆周率估计值 ' + estimate
+        : '画布已清空。';
+    }
+
+    function drawPaper() {
+      pen.fillStyle = '#fffdf3';
+      pen.fillRect(0, 0, size, size);
+      pen.strokeStyle = '#dce8e2';
+      pen.lineWidth = 1;
+      pen.beginPath();
+      for (let step = 1; step < 20; step++) {
+        const position = size * step / 20;
+        pen.moveTo(position, 0);
+        pen.lineTo(position, size);
+        pen.moveTo(0, position);
+        pen.lineTo(size, position);
+      }
+      pen.stroke();
+      pen.beginPath();
+      pen.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
+      pen.strokeStyle = '#567b85';
+      pen.lineWidth = 2;
+      pen.stroke();
+    }
+
+    function scatter(count) {
+      const insideDots = new Path2D();
+      const outsideCrosses = new Path2D();
+      for (let i = 0; i < count; i++) {
+        const x = 2 * Math.random() - 1;
+        const y = 2 * Math.random() - 1;
+        const px = (x + 1) * size / 2;
+        const py = (1 - y) * size / 2;
+        if (x * x + y * y <= 1) {
+          tally.inside++;
+          insideDots.moveTo(px + 2.9, py);
+          insideDots.arc(px, py, 2.9, 0, 2 * Math.PI);
+        } else {
+          outsideCrosses.moveTo(px - 3, py - 3);
+          outsideCrosses.lineTo(px + 3, py + 3);
+          outsideCrosses.moveTo(px + 3, py - 3);
+          outsideCrosses.lineTo(px - 3, py + 3);
+        }
+      }
+      pen.fillStyle = '#275c91aa';
+      pen.fill(insideDots);
+      pen.strokeStyle = '#af5b3aa6';
+      pen.lineWidth = 1.9;
+      pen.stroke(outsideCrosses);
+      tally.total += count;
+      showResult();
+    }
+
+    document.querySelectorAll('button[data-count]').forEach(button => {
+      button.addEventListener('click', () => scatter(Number(button.dataset.count)));
+    });
+    document.getElementById('reset').addEventListener('click', () => {
+      tally.inside = 0;
+      tally.total = 0;
+      drawPaper();
+      showResult();
+    });
+    drawPaper();
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1b392e">
+  <title>山径接线员 · 山泠庐</title>
+  <link rel="stylesheet" href="./game.css">
+  <script src="./game.js" defer></script>
+</head>
+<body>
+  <main class="game">
+    <header class="scene">
+      <img src="./cover.png" alt="" width="960" height="540">
+      <div class="heading">
+        <a class="home" href="/" target="_top">← 作品墙</a>
+        <h1>山径接线员</h1>
+      </div>
+    </header>
+    <section class="station" aria-label="接线台">
+      <div class="guide">
+        <h2 id="trail">溪谷小径</h2>
+        <p>点一下线块，它会顺时针转动 90°。从左下角的电源接到右上角的木塔，沿途的线路就会亮起来。</p>
+        <p>每转一次用掉一格电量。电量用完后，可以重试同一张线路图。</p>
+        <div class="actions">
+          <button id="reset" type="button">重试本图</button>
+          <button id="next" type="button">换条山径 <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+      <div class="console">
+        <div class="readings">
+          <span>剩余电量 <strong id="charge"></strong></span>
+          <span class="indicator" id="signal"></span>
+        </div>
+        <div id="board" aria-label="四行四列的山径线路图"></div>
+        <p id="status" role="status"></p>
+      </div>
+    </section>
+    <noscript>开启浏览器的 JavaScript 即可旋转线块。</noscript>
+  </main>
+</body>
+</html>

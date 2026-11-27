@@ -1,0 +1,11 @@
+---
+import { ArrowLeft } from '@lucide/astro';
+import Shell from '../layouts/Shell.astro';
+import { Content } from '../../CONTRIBUTING.md';
+---
+<Shell title="投稿指南" description="从一个作品目录开始，在 GitHub 上向山泠庐投稿。">
+  <div class="paper-page">
+    <a class="back" href="/#works"><ArrowLeft size={14} />返回作品集</a>
+    <article class="prose"><Content /></article>
+  </div>
+</Shell>

@@ -1,0 +1,20 @@
+---
+import { ArrowLeft, ArrowUpRight } from '@lucide/astro';
+import Shell from '../layouts/Shell.astro';
+---
+<Shell title="关于我们" description="山泠庐是一个本科生宿舍的创作小组。">
+  <div class="paper-page">
+    <a class="back" href="/#works"><ArrowLeft size={14} />返回作品集</a>
+    <article class="prose">
+      <h1>关于山泠庐</h1>
+      <p>我们是一群住在同一个宿舍的本科生。平时一起琢磨想法，用 vibe coding 把它们做成能玩的游戏、自己用得上的小工具，或者一篇写给朋友看的手记。</p>
+      <p>山泠庐是我们一起维护的作品集。每件作品保留自己的样子，也有一个可以直接发给朋友的入口。</p>
+      <h2>这间小屋里的第一批作品</h2>
+      <p>小站开张时，我们和 Codex 一起放进了两件首发作品。你可以去山路上接通第一座信标，也可以在方格纸上撒一把随机点。</p>
+      <p><a href="/works/ridge-relay/">玩《山径接线员》</a>　<a href="/works/pi-notebook/">读《把圆周率投出来》</a></p>
+      <h2>一起做点东西</h2>
+      <p>小组成员可以把静态作品直接放进主站，也可以登记自己单独部署的作品。做完一件就收录一件。</p>
+      <p><a href="/contribute/">阅读投稿指南</a>　<a href="https://github.com/shanlinglu">山泠庐 GitHub 组织 <ArrowUpRight size={14} /></a></p>
+    </article>
+  </div>
+</Shell>
