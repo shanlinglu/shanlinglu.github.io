@@ -6,6 +6,7 @@ import type { getWorks } from '../lib/works';
 
 interface Props { work: ReturnType<typeof getWorks>[number] }
 const { work } = Astro.props;
+const { Content } = work;
 const articles = getCollectionArticles(work.slug);
 ---
 
@@ -15,6 +16,7 @@ const articles = getCollectionArticles(work.slug);
     <header class="archive-head">
       <h1 id="collection-title">{work.title}</h1>
       <p>{work.summary}</p>
+      <div class="archive-details prose"><Content /></div>
     </header>
     <ol class="article-list" aria-label="文章列表">
       {articles.map(article => (
@@ -40,6 +42,7 @@ const articles = getCollectionArticles(work.slug);
   .archive-head { margin-bottom: 34px; }
   .archive-head h1 { margin-bottom: 10px; }
   .archive-head p { margin: 0; color: var(--muted); line-height: 1.7; }
+  .archive-details :global(p) { margin: 8px 0 0; font-size: 14px; }
   .article-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
   .article-list li { border-bottom: 1px solid var(--line); }
   .article-link { display: flex; align-items: center; gap: 22px; padding: 19px 0; }
