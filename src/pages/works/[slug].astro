@@ -1,5 +1,6 @@
 ---
 import { ArrowLeft, ArrowUpRight } from '@lucide/astro';
+import CollectionIndex from '../../components/CollectionIndex.astro';
 import Shell from '../../layouts/Shell.astro';
 import { getWorks } from '../../lib/works';
 
@@ -9,7 +10,7 @@ export function getStaticPaths() {
 const { work } = Astro.props;
 const { Content } = work;
 ---
-{work.article ? <Shell title={work.title} description={work.summary} assetBase={'/assets/works/' + work.slug + '/'}>
+{work.collection ? <CollectionIndex work={work} /> : work.article ? <Shell title={work.title} description={work.summary} assetBase={'/assets/works/' + work.slug + '/'}>
   <article class="paper-page">
     <a href="/#works" class="back"><ArrowLeft size={14} />返回作品集</a>
     <header><h1>{work.title}</h1><p class="byline">{work.type} · {work.author}</p></header>

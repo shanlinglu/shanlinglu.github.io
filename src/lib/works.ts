@@ -33,13 +33,14 @@ function workFromFile(path: string, page: MarkdownInstance<Fields>) {
   if (source && !https(source)) invalid('source 需要完整的 HTTPS 网址。');
   const external = https(entry);
   const article = entry === 'article';
-  if (!article && !external && !/\.html?$/i.test(entry)) invalid('entry 应填写 article、HTML 相对路径或完整的 HTTPS 网址。');
+  const collection = entry === 'collection';
+  if (!article && !collection && !external && !/\.html?$/i.test(entry)) invalid('entry 应填写 article、collection、HTML 相对路径或完整的 HTTPS 网址。');
   const href = '/works/' + slug + '/';
-  const target = article ? href : external ? entry : asset(entry);
+  const target = article || collection ? href : external ? entry : asset(entry);
   return {
-    slug, title, author, type, summary, entry, article, target, href: external ? entry : href,
+    slug, title, author, type, summary, entry, article, collection, target, href: external ? entry : href,
     coverUrl: cover ? asset(cover) : undefined, source: source || undefined,
-    action: field('action', true) || (article ? '阅读作品' : '打开作品'), Content: page.Content,
+    action: field('action', true) || (collection ? '进入栏目' : article ? '阅读作品' : '打开作品'), Content: page.Content,
   };
 }
 
