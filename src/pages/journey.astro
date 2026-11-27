@@ -35,14 +35,17 @@ const total = String(photos.length).padStart(2, '0');
           <Upload size={19} aria-hidden="true" />
         </a>
       </div>
-      <noscript><style>.journey-stage:not([data-ready]) .journey-photo:not([data-position='hidden']) { visibility: visible }</style></noscript>
+      <noscript><style is:inline>.journey-stage:not([data-ready]) .journey-photo:not([data-position='hidden']) { visibility: visible }</style></noscript>
       <div class="journey-stage" data-album-stage>
         {photos.map((photo, index) => {
           const position = positions.find(([offset]) => (offset + photos.length) % photos.length === index)?.[1] ?? 'hidden';
           return (
             <figure class="journey-photo" data-album-photo data-position={position} data-title={photo.title} inert={position === 'hidden'}>
               <button class="journey-print" type="button" aria-label={'查看照片 ' + photo.title} data-album-select>
-                <img src={photo.src} alt="" loading={position === 'hidden' ? 'lazy' : 'eager'} fetchpriority={position === 'current' ? 'high' : undefined} decoding={position === 'hidden' ? 'async' : 'auto'} draggable="false" />
+                <img data-src={photo.src} alt="" decoding="async" draggable="false" />
+                {position !== 'hidden' && <noscript>
+                  <img src={photo.src} alt="" loading={position === 'current' ? 'eager' : 'lazy'} decoding="async" />
+                </noscript>}
                 <span class="journey-photo-fallback" data-album-fallback hidden>
                   <ImageOff size={26} aria-hidden="true" /><span class="journey-sr-only">照片无法加载</span>
                 </span>

@@ -1,5 +1,6 @@
 node_modules/
 .astro/
 dist/
+/public/journey-photos/optimized/
 .DS_Store
 *.log

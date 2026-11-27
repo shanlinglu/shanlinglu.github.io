@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/optimize-journey-photos.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/optimize-journey-photos.mjs",
     "build": "astro build",
     "preview": "astro preview"
   },
@@ -15,5 +17,8 @@
     "@lucide/astro": "1.81.0",
     "astro": "^6.0.0",
     "mrmime": "2.0.1"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5"
   }
 }

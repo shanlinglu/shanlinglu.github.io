@@ -17,6 +17,29 @@ type Gesture = {
   horizontal: boolean;
 };
 
+function waitForImage(image: HTMLImageElement): Promise<void> {
+  const decode = () => typeof image.decode === 'function'
+    ? image.decode().catch(() => undefined)
+    : Promise.resolve();
+  if (image.complete) return decode();
+
+  return new Promise<void>(resolve => {
+    function finish() {
+      image.removeEventListener('load', finish);
+      image.removeEventListener('error', finish);
+      resolve();
+    }
+    image.addEventListener('load', finish);
+    image.addEventListener('error', finish);
+  }).then(decode);
+}
+
+function requestImage(image: HTMLImageElement, priority: 'high' | 'low') {
+  image.fetchPriority = priority;
+  const src = image.dataset.src;
+  if (src && !image.hasAttribute('src')) image.src = src;
+}
+
 export function initJourneyAlbum(root: HTMLElement) {
   const stage = root.querySelector<HTMLElement>('[data-album-stage]');
   const figures = Array.from(root.querySelectorAll<HTMLElement>('[data-album-photo]'));
@@ -42,7 +65,7 @@ export function initJourneyAlbum(root: HTMLElement) {
   let suppressClick = false;
   let playing = total > 1;
   let playbackTimer: number | undefined;
-  let revealRequest = 0;
+  let openingTimer: number | undefined;
 
   function shuffleSlides() {
     for (let index = slides.length - 1; index > 0; index--) {
@@ -54,7 +77,7 @@ export function initJourneyAlbum(root: HTMLElement) {
   function schedulePlayback() {
     if (playbackTimer !== undefined) window.clearTimeout(playbackTimer);
     playbackTimer = undefined;
-    if (!playing || document.hidden || gesture) return;
+    if (!playing || document.hidden || gesture || !stage?.hasAttribute('data-ready')) return;
     playbackTimer = window.setTimeout(() => show(activeIndex + 1), 5_000);
   }
 
@@ -83,11 +106,13 @@ export function initJourneyAlbum(root: HTMLElement) {
     }
 
     const focusedIndex = slides.findIndex(slide => slide.select === document.activeElement);
-    slides.forEach(({ figure, select, image }, slideIndex) => {
+    const focusedImage = slides[activeIndex].image;
+    if (focusedImage) requestImage(focusedImage, 'high');
+
+    slides.forEach(({ figure, select }, slideIndex) => {
       const position = positions.get(slideIndex) ?? 'hidden';
       figure.dataset.position = position;
       figure.inert = position === 'hidden';
-      if (image && position !== 'hidden') image.loading = 'eager';
       if (position === 'current') {
         select?.setAttribute('aria-current', 'true');
       } else {
@@ -100,16 +125,33 @@ export function initJourneyAlbum(root: HTMLElement) {
 
     if (current) current.textContent = String(activeIndex + 1).padStart(pad, '0');
     if (title) title.textContent = slides[activeIndex].figure.dataset.title ?? '';
-    if (!stage?.hasAttribute('data-ready')) {
-      const activeReveal = ++revealRequest;
-      const images = slides
-        .filter((_, slideIndex) => positions.has(slideIndex))
-        .map(slide => slide.image?.decode().catch(() => undefined));
-      void Promise.all(images).then(() => {
-        if (activeReveal === revealRequest) stage?.setAttribute('data-ready', '');
-      });
+    function loadSurroundings() {
+      for (const slideIndex of positions.keys()) {
+        const image = slides[slideIndex].image;
+        if (image && image !== focusedImage) requestImage(image, 'low');
+      }
     }
-    schedulePlayback();
+
+    if (stage?.hasAttribute('data-ready')) {
+      loadSurroundings();
+      schedulePlayback();
+      return;
+    }
+
+    // The opening photo has the connection to itself until it settles or times out.
+    window.clearTimeout(openingTimer);
+    const timeout = window.setTimeout(() => reveal(), 4_000);
+    openingTimer = timeout;
+    function reveal() {
+      if (openingTimer !== timeout) return;
+      window.clearTimeout(timeout);
+      openingTimer = undefined;
+      stage?.setAttribute('data-ready', '');
+      loadSurroundings();
+      schedulePlayback();
+    }
+    if (focusedImage) void waitForImage(focusedImage).then(reveal);
+    else reveal();
   }
 
   slides.forEach(slide => {
@@ -119,12 +161,10 @@ export function initJourneyAlbum(root: HTMLElement) {
     if (!image) return;
 
     const markUnavailable = () => {
-      figure.dataset.unavailable = '';
       image.hidden = true;
       if (fallback) fallback.hidden = false;
     };
     image.addEventListener('error', markUnavailable);
-    if (image.complete && image.naturalWidth === 0) markUnavailable();
   });
 
   if (previous) previous.disabled = total < 2;
