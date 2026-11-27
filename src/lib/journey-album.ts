@@ -25,6 +25,7 @@ export function initJourneyAlbum(root: HTMLElement) {
   const slides = figures.map(figure => ({
     figure,
     select: figure.querySelector<HTMLButtonElement>('[data-album-select]'),
+    image: figure.querySelector('img'),
   }));
   const current = root.querySelector<HTMLElement>('[data-album-current]');
   const title = root.querySelector<HTMLElement>('[data-album-title]');
@@ -51,10 +52,11 @@ export function initJourneyAlbum(root: HTMLElement) {
     }
 
     const focusedIndex = slides.findIndex(slide => slide.select === document.activeElement);
-    slides.forEach(({ figure, select }, slideIndex) => {
+    slides.forEach(({ figure, select, image }, slideIndex) => {
       const position = positions.get(slideIndex) ?? 'hidden';
       figure.dataset.position = position;
       figure.inert = position === 'hidden';
+      if (image && position !== 'hidden') image.loading = 'eager';
       if (position === 'current') {
         select?.setAttribute('aria-current', 'true');
       } else {
@@ -69,9 +71,8 @@ export function initJourneyAlbum(root: HTMLElement) {
     if (title) title.textContent = slides[activeIndex].figure.dataset.title ?? '';
   }
 
-  slides.forEach(({ figure, select }, index) => {
+  slides.forEach(({ figure, select, image }, index) => {
     select?.addEventListener('click', () => show(index));
-    const image = figure.querySelector('img');
     const fallback = figure.querySelector<HTMLElement>('[data-album-fallback]');
     if (!image) return;
 

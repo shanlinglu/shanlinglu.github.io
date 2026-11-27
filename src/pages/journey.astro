@@ -37,7 +37,7 @@ const total = String(photos.length).padStart(2, '0');
           return (
             <figure class="journey-photo" data-album-photo data-position={position} data-title={photo.title} inert={position === 'hidden'}>
               <button class="journey-print" type="button" aria-label={'查看照片 ' + photo.title} data-album-select>
-                <img src={photo.src} alt="" loading={position === 'current' ? 'eager' : 'lazy'} decoding="async" draggable="false" />
+                <img src={photo.src} alt="" loading={position === 'hidden' ? 'lazy' : 'eager'} fetchpriority={position === 'current' ? 'high' : undefined} decoding="async" draggable="false" />
                 <span class="journey-photo-fallback" data-album-fallback hidden>
                   <ImageOff size={26} aria-hidden="true" />照片无法加载
                 </span>
